@@ -33,16 +33,18 @@ const NumberWords = {
   eight: 8,
   nine: 9,
 };
+// console.log(NumberWords);
+const ReverseNumberWords = Object.keys(NumberWords).reduce(
+  (o, key, value) => ({ ...o, [[...key].reverse().join("")]: value + 1 }),
+  {},
+);
+// console.log(ReverseNumberWords);
 const numerator = new RegExp(
   "([\\d]|" + Object.keys(NumberWords).join("|") + ")",
   "g",
 );
 const reverseNumerator = new RegExp(
-  "([\\d]|" +
-    Object.keys(NumberWords)
-      .map((s) => [...s].reverse().join(""))
-      .join("|") +
-    ")",
+  "([\\d]|" + Object.keys(ReverseNumberWords).join("|") + ")",
   "g",
 );
 const part2 = (rawInput: string) => {
@@ -53,10 +55,11 @@ const part2 = (rawInput: string) => {
     // console.log("Decoded " + charNumber);
     if (isNaN(charNumber)) {
       if (reverse) {
-        str = [...str].reverse().join("");
+        charNumber = (ReverseNumberWords as { [index: string]: number })[str];
+      } else {
+        charNumber = (NumberWords as { [index: string]: number })[str];
       }
-      charNumber = (NumberWords as { [index: string]: number })[str];
-      // console.log("StrDecoded" + charNumber);
+      // console.log("StrDecoded " + charNumber);
     }
     return charNumber;
   };

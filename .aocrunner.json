@@ -40,13 +40,13 @@
         "solved": true,
         "result": "525181",
         "attempts": [],
-        "time": 4.490054
+        "time": 5.929196
       },
       "part2": {
-        "solved": false,
-        "result": null,
+        "solved": true,
+        "result": "84289137",
         "attempts": [],
-        "time": null
+        "time": 4.25561
       }
     },
     {

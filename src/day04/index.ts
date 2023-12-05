@@ -36,12 +36,14 @@ const parseInput = (rawInput: string) => {
   };
 };
 
+const nWinners = (card: Card) => {
+  return [...card.winningNumbers].filter((x) => card.playingNumbers.has(x))
+    .length;
+};
 const score = (card: Card) => {
-  const winners = [...card.winningNumbers].filter((x) =>
-    card.playingNumbers.has(x),
-  );
-  if (winners.length > 0) {
-    return Math.pow(2, winners.length - 1);
+  const winners = nWinners(card);
+  if (winners > 0) {
+    return Math.pow(2, winners - 1);
   }
   return 0;
 };
@@ -50,22 +52,33 @@ const part1 = (rawInput: string) => {
   return input.cards.map((c) => score(c)).reduce((acc, e) => acc + e, 0);
 };
 
+const cardSplosion = (index: number, cards: Card[]) => {
+  const value: number = Array<number>(nWinners(cards[index]))
+    .fill(0)
+    .map((_, i) => i + 1 + index)
+    .map((c) => cardSplosion(c, cards))
+    .reduce((acc, n) => acc + n, 1);
+  return value;
+};
 const part2 = (rawInput: string) => {
   const input = parseInput(rawInput);
 
-  return;
+  return input.cards
+    .map((_, i) => cardSplosion(i, input.cards))
+    .reduce((acc, e) => acc + e, 0);
 };
 
-run({
-  part1: {
-    tests: [
-      {
-        input: `Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53
+const TEST_DATA = `Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53
 Card 2: 13 32 20 16 61 | 61 30 68 82 17 32 24 19
 Card 3:  1 21 53 59 44 | 69 82 63 72 16 21 14  1
 Card 4: 41 92 73 84 69 | 59 84 76 51 58  5 54 83
 Card 5: 87 83 26 28 32 | 88 30 70 12 93 22 82 36
-Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11`,
+Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11`;
+run({
+  part1: {
+    tests: [
+      {
+        input: TEST_DATA,
         expected: 13,
       },
     ],
@@ -73,10 +86,10 @@ Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11`,
   },
   part2: {
     tests: [
-      // {
-      //   input: ``,
-      //   expected: "",
-      // },
+      {
+        input: TEST_DATA,
+        expected: 30,
+      },
     ],
     solution: part2,
   },

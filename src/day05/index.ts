@@ -108,10 +108,8 @@ const parseInput = (rawInput: string) => {
   }
 };
 
-const part1 = (rawInput: string) => {
-  const input = parseInput(rawInput);
-  // console.log(input);
-  return input?.seeds
+const solve = (seeds: number[], input: Input) => {
+  return seeds
     .map((s) => {
       var current = "seed";
       var entity = s;
@@ -132,17 +130,31 @@ const part1 = (rawInput: string) => {
     .reduce((acc, loc) => (acc.location < loc.location ? acc : loc)).location;
 };
 
-const part2 = (rawInput: string) => {
-  const input = parseInput(rawInput);
-
-  return;
+const part1 = (rawInput: string) => {
+  const input = parseInput(rawInput)!;
+  const seeds = input?.seeds!;
+  // console.log(input);
+  return solve(seeds, input);
 };
 
-run({
-  part1: {
-    tests: [
-      {
-        input: `seeds: 79 14 55 13
+const expandSeeds = (seeds: number[]) => {
+  return seeds
+    .reduce((result, _, index, array) => {
+      if (index % 2 === 0) result.push(array.slice(index, index + 2));
+      return result;
+    }, [] as number[][])
+    .flatMap((range) =>
+      Array.from({ length: range[1] }, (_, i) => i + range[0]),
+    );
+};
+
+const part2 = (rawInput: string) => {
+  const input = parseInput(rawInput)!;
+  const seeds = expandSeeds(input.seeds);
+  return solve(seeds, input);
+};
+
+const TEST_DATA = `seeds: 79 14 55 13
 
 seed-to-soil map:
 50 98 2
@@ -174,7 +186,12 @@ temperature-to-humidity map:
 
 humidity-to-location map:
 60 56 37
-56 93 4`,
+56 93 4`;
+run({
+  part1: {
+    tests: [
+      {
+        input: TEST_DATA,
         expected: 35,
       },
     ],
@@ -182,10 +199,10 @@ humidity-to-location map:
   },
   part2: {
     tests: [
-      // {
-      //   input: ``,
-      //   expected: "",
-      // },
+      {
+        input: TEST_DATA,
+        expected: 46,
+      },
     ],
     solution: part2,
   },

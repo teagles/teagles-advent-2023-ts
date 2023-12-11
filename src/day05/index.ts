@@ -14,17 +14,20 @@ type Mapping = {
   toType: string;
   mappings: MappingLine[];
 };
+
 type MappingLine = {
   destinationStart: number;
   sourceStart: number;
   rangeLength: number;
 };
+
 const mappingLineContains = (element: number, mappingLine: MappingLine) => {
   return (
     element >= mappingLine.sourceStart &&
     element < mappingLine.sourceStart + mappingLine.rangeLength
   );
 };
+
 const mapElement = (element: number, mapping: Mapping) => {
   const foundMappings = mapping.mappings.filter((ml) =>
     mappingLineContains(element, ml),
@@ -39,13 +42,16 @@ const mapElement = (element: number, mapping: Mapping) => {
     throw new RangeError("Well this is embarrassing.");
   }
 };
+
 const CategoriesToShorts = Object.freeze(
   new Map<string, string>(Categories.map((c) => [c, c.replace(/(-)/g, "")])),
 );
+
 type Input = {
   seeds: number[];
   mappings: Map<string, Mapping>;
 };
+
 const InputParser = new RegExp(
   [
     ["seeds:(?<seeds>( \\d+)+)\\n"],
@@ -61,6 +67,7 @@ const InputParser = new RegExp(
     .join("\\n"),
   "g",
 );
+
 const mappingsForGroup = (keyStr: string, valuesStr: string) => {
   // console.log("key" + keyStr);
   // console.log("value" + valuesStr);
@@ -85,6 +92,7 @@ const mappingsForGroup = (keyStr: string, valuesStr: string) => {
   // console.log(mapping);
   return mapping;
 };
+
 const parseInput = (rawInput: string) => {
   const matchedInput = [...(rawInput + "\n").matchAll(InputParser)][0];
   // console.log(Object.keys(matchedInput.groups as Object));
@@ -108,11 +116,12 @@ const parseInput = (rawInput: string) => {
   }
 };
 
-const solve = (seeds: number[], input: Input) => {
-  return seeds
-    .map((s) => {
+const solve = (seeds: number[][], input: Input) => {
+  var lowest = Number.POSITIVE_INFINITY;
+  for (let pair of seeds) {
+    for (let i = 0; i < pair[1]; i++) {
       var current = "seed";
-      var entity = s;
+      var entity = pair[0] + i;
       while (current != "location") {
         // console.log(current + ":"  + entity)
         const next: Mapping = input.mappings.get(current)!;
@@ -121,31 +130,27 @@ const solve = (seeds: number[], input: Input) => {
         entity = mapElement(entity, next);
         current = next.toType;
       }
-      // console.log(current + ":"  + entity);
-      return {
-        location: entity,
-        seed: s,
-      };
-    })
-    .reduce((acc, loc) => (acc.location < loc.location ? acc : loc)).location;
+      lowest = lowest < entity ? lowest : entity;
+    }
+  }
+  return lowest;
 };
 
 const part1 = (rawInput: string) => {
   const input = parseInput(rawInput)!;
   const seeds = input?.seeds!;
   // console.log(input);
-  return solve(seeds, input);
+  return solve(
+    seeds.map((s) => [s, 1]),
+    input,
+  );
 };
 
 const expandSeeds = (seeds: number[]) => {
-  return seeds
-    .reduce((result, _, index, array) => {
-      if (index % 2 === 0) result.push(array.slice(index, index + 2));
-      return result;
-    }, [] as number[][])
-    .flatMap((range) =>
-      Array.from({ length: range[1] }, (_, i) => i + range[0]),
-    );
+  return seeds.reduce((result, _, index, array) => {
+    if (index % 2 === 0) result.push(array.slice(index, index + 2));
+    return result;
+  }, [] as number[][]);
 };
 
 const part2 = (rawInput: string) => {
@@ -187,6 +192,7 @@ temperature-to-humidity map:
 humidity-to-location map:
 60 56 37
 56 93 4`;
+
 run({
   part1: {
     tests: [
@@ -207,5 +213,5 @@ run({
     solution: part2,
   },
   trimTestInputs: true,
-  onlyTests: true,
+  onlyTests: false,
 });

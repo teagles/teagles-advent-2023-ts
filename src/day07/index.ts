@@ -14,6 +14,7 @@ enum Card {
   Four = 4,
   Three = 3,
   Two = 2,
+  Wild = 1,
 }
 
 type CardStrings = keyof typeof Card;
@@ -34,14 +35,6 @@ const compareFn = (a: Hand, b: Hand) => {
         return true;
       }
     });
-    // a.cards.forEach((c, i) => {
-    //   console.log("a:" + c + " b:" + b.cards[i]);
-    //   if (c < b.cards[i]) {
-    //     return -1;
-    //   } else if (c > b.cards[i]) {
-    //     return 1;
-    //   }
-    // });
   }
   return result;
 };
@@ -70,21 +63,47 @@ const typeFor = (cards: Card[]) => {
   if (countCounts.get(5)) {
     return HandType.FiveOfAKind;
   } else if (countCounts.get(4)) {
-    return HandType.FourOfAKind;
+    if (cardCounts.get(Card.Wild)) {
+      return HandType.FiveOfAKind;
+    } else {
+      return HandType.FourOfAKind;
+    }
   } else if (countCounts.get(3)) {
     if (countCounts.get(2)) {
-      return HandType.FullHouse;
+      if (cardCounts.get(Card.Wild)) {
+        return HandType.FiveOfAKind;
+      } else {
+        return HandType.FullHouse;
+      }
     } else {
-      return HandType.ThreeOfAKind;
+      if (cardCounts.get(Card.Wild)) {
+        return HandType.FourOfAKind;
+      } else {
+        return HandType.ThreeOfAKind;
+      }
     }
   } else if (countCounts.get(2)) {
     if (countCounts.get(2) == 2) {
-      return HandType.TwoPair;
+      if (cardCounts.get(Card.Wild) == 2) {
+        return HandType.FourOfAKind;
+      } else if (cardCounts.get(Card.Wild)) {
+        return HandType.FullHouse;
+      } else {
+        return HandType.TwoPair;
+      }
     } else {
-      return HandType.OnePair;
+      if (cardCounts.get(Card.Wild)) {
+        return HandType.ThreeOfAKind;
+      } else {
+        return HandType.OnePair;
+      }
     }
   } else {
-    return HandType.HighCard;
+    if (cardCounts.get(Card.Wild)) {
+      return HandType.OnePair;
+    } else {
+      return HandType.HighCard;
+    }
   }
 };
 
@@ -92,10 +111,16 @@ class Hand {
   cards: Card[];
   bid: number;
   type: HandType;
-  constructor(cards: Card[], bid: number) {
-    this.cards = cards;
+  constructor(cards: Card[], bid: number, jacksWild: boolean) {
+    this.cards = cards.map((c) => {
+      if (jacksWild && c == Card.J) {
+        return Card.Wild;
+      } else {
+        return c;
+      }
+    });
     this.bid = bid;
-    this.type = typeFor(cards);
+    this.type = typeFor(this.cards);
   }
 }
 
@@ -110,26 +135,29 @@ const decard = (cards: string) => {
     }
   });
 };
-const parseInput = (rawInput: string) => {
+const parseInput = (rawInput: string, jacksWild: boolean) => {
   return rawInput.split("\n").map((line) => {
     // console.log(line.match(handMatcher));
     const matches = line.match(handMatcher);
-    return new Hand(decard(matches![1]), Number(matches![2]));
+    return new Hand(decard(matches![1]), Number(matches![2]), jacksWild);
   });
 };
 
-const part1 = (rawInput: string) => {
-  const input = parseInput(rawInput);
+const calculateWinnings = (input: Hand[]) => {
   // console.log(input);
   input.sort(compareFn);
   // console.log(input);
   return input.reduce((p, c, i) => p + c.bid * (i + 1), 0);
 };
 
-const part2 = (rawInput: string) => {
-  const input = parseInput(rawInput);
+const part1 = (rawInput: string) => {
+  const input = parseInput(rawInput, false);
+  return calculateWinnings(input);
+};
 
-  return;
+const part2 = (rawInput: string) => {
+  const input = parseInput(rawInput, true);
+  return calculateWinnings(input);
 };
 
 const TEST_DATA = `32T3K 765
@@ -149,13 +177,13 @@ run({
   },
   part2: {
     tests: [
-      // {
-      //   input: TEST_DATA,
-      //   expected: "",
-      // },
+      {
+        input: TEST_DATA,
+        expected: 5905,
+      },
     ],
     solution: part2,
   },
   trimTestInputs: true,
-  onlyTests: true,
+  onlyTests: false,
 });

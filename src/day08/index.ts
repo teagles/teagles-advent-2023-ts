@@ -1,11 +1,68 @@
 import run from "aocrunner";
 
-const parseInput = (rawInput: string) => rawInput;
+const InputParser = /(?<instructions>[RL]+)\n(?<nodes>(\n[^\n]+)+)/g;
+const NodeParser = /(?<node>\w{3}) = \((?<left>\w{3}), (?<right>\w{3})\)/g;
+enum Direction {
+  LEFT = "LEFT",
+  RIGHT = "RIGHT",
+}
+const { LEFT, RIGHT } = Direction;
+type Node = {
+  [key in Direction]: string;
+};
+class Instructionator {
+  instructions: Direction[];
+  index: number;
+  constructor(inputDirections: string) {
+    this.instructions = [...inputDirections].map((c) => {
+      if (c == "R") {
+        return RIGHT;
+      } else {
+        return LEFT;
+      }
+    });
+    this.index = 0;
+  }
+  next() {
+    const result = this.instructions[this.index];
+    this.index = (this.index + 1) % this.instructions.length;
+    return result;
+  }
+}
+const parseInput = (rawInput: string) => {
+  const groups = [...rawInput.matchAll(InputParser)][0].groups;
+  const instructions = groups!["instructions"];
+  const unParsedNodes = groups!["nodes"];
+  // console.log(instructions);
+  // console.log(unParsedNodes.trim().split("\n"));
+  const nodes = new Map<string, Node>();
+  unParsedNodes
+    .trim()
+    .split("\n")
+    .forEach((n) => {
+      const nodeGroups = n.matchAll(NodeParser).next().value.groups;
+      nodes.set(nodeGroups["node"], {
+        name: nodeGroups["node"],
+        LEFT: nodeGroups["left"],
+        RIGHT: nodeGroups["right"],
+      } as Node);
+    });
+  return {
+    instructions: new Instructionator(instructions),
+    nodes: nodes,
+  };
+};
 
 const part1 = (rawInput: string) => {
   const input = parseInput(rawInput);
-
-  return;
+  console.log(input);
+  var cNode = "AAA";
+  var steps = 0;
+  while (cNode != "ZZZ") {
+    cNode = input.nodes.get(cNode)![input.instructions.next()];
+    steps++;
+  }
+  return steps;
 };
 
 const part2 = (rawInput: string) => {
@@ -43,8 +100,10 @@ ZZZ = (ZZZ, ZZZ)`,
   part2: {
     tests: [
       {
-        input: ``,
-        expected: "",
+        input: `LLR
+
+AAA = (BBB, BBB)`,
+        expected: 0,
       },
     ],
     solution: part2,

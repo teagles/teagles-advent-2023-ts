@@ -21,7 +21,7 @@ My TypeScript submissions to https://adventofcode.com/ 2023
 [![Day](https://badgen.net/badge/05/%E2%98%85%E2%98%85/green)](src/day05)
 [![Day](https://badgen.net/badge/06/%E2%98%85%E2%98%85/green)](src/day06)
 [![Day](https://badgen.net/badge/07/%E2%98%85%E2%98%85/green)](src/day07)
-[![Day](https://badgen.net/badge/08/%E2%98%85%E2%98%86/yellow)](src/day08)
+[![Day](https://badgen.net/badge/08/%E2%98%85%E2%98%85/green)](src/day08)
 ![Day](https://badgen.net/badge/09/%E2%98%86%E2%98%86/gray)
 ![Day](https://badgen.net/badge/10/%E2%98%86%E2%98%86/gray)
 ![Day](https://badgen.net/badge/11/%E2%98%86%E2%98%86/gray)
@@ -121,9 +121,9 @@ Both parts: 9.503ms
 
 ```
 Day 08
-Time part 1: 14.732ms
-Time part 2: -
-Both parts: 14.732ms
+Time part 1: 4.384ms
+Time part 2: 12.245ms
+Both parts: 16.629ms
 ```
 
 ```
@@ -246,8 +246,8 @@ Both parts: -
 ```
 
 ```
-Total stars: 15/50
-Total time: 1385275.847ms
+Total stars: 16/50
+Total time: 1385277.743ms
 ```
 
 <!--/RESULTS-->
